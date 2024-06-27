@@ -124,7 +124,9 @@ class Transforms(object):
         if self.resize:
             result = F.interpolate(result, self.outputSize, mode="bilinear", align_corners=True)
             if obsMask is not None:
-                obsMask = F.interpolate(obsMask, self.outputSize, mode="nearest", align_corners=True)
+                tmp_fix = obsMask.unsqueeze(0).unsqueeze(0).float()
+                obsMask = F.interpolate(tmp_fix, self.outputSize, mode="nearest")[0,0]
+                # obsMask = F.interpolate(obsMask, self.outputSize, mode="nearest", align_corners=True)
 
         outDict = {"data": result, "simParameters": simParameters, "allParameters": allParameters, "path": path}
         if obsMask is not None:

@@ -83,7 +83,7 @@ class PredictionModel(nn.Module):
 
                 if "unet" in self.p_md.arch:
                     self.modelDecoder = Unet(dim=self.p_d.dataSize[0], out_dim=outChannels, channels=inChannels,
-                                        dim_mults=(1,1,1), use_convnext=True, convnext_mult=1, with_time_emb=False)
+                                        dim_mults=(1,1,1), use_convnext=True, convnext_mult=p_md.convnext_mult, with_time_emb=False)
 
                 elif "resnet" in self.p_md.arch:
                     self.modelDecoder = DilatedResNet(inFeatures=inChannels, outFeatures=outChannels, blocks=4, features=self.p_md.decWidth, dilate="dil_" in self.p_md.arch)

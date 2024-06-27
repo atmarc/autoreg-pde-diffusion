@@ -151,7 +151,7 @@ class LossHistory(object):
                 metrics["m/%s_%s" % (hist.mode, stat)] = value
                 if finalPrint:
                     print("%s  %s: %1.3f" % (hist.mode, stat, value))
-                    logging.info("%s %s: %1.3f" % (hist.mode, stat, value))
+                    logging.info("%s %s: %1.10f" % (hist.mode, stat, value))
 
         self.writer.add_hparams(par, metrics)
 

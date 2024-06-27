@@ -146,7 +146,7 @@ class ModelParamsEncoder(object):
 
 class ModelParamsDecoder(object):
     def __init__(self, arch="skip", pretrained=False, frozen=False, decWidth=48, vae=False, trainingNoise=0.0,
-                 diffSteps=500, diffSchedule="linear", diffCondIntegration="noisy", fnoModes=(16,16), refinerStd=0.0):
+                 diffSteps=500, diffSchedule="linear", diffCondIntegration="noisy", fnoModes=(16,16), refinerStd=0.0, convnext_mult=2):
         self.arch = arch                 # architecture variant
         self.pretrained = pretrained     # load pretrained weight initialization
         self.frozen = frozen             # freeze weights after initialization
@@ -158,6 +158,7 @@ class ModelParamsDecoder(object):
         self.diffCondIntegration = diffCondIntegration # integrationg of conditioning during diffusion training
         self.fnoModes = fnoModes         # number of fourier modes for FNO setup
         self.refinerStd = refinerStd     # noise standard dev. in pde refiner setup
+        self.convnext_mult = convnext_mult
 
     @classmethod
     def fromDict(cls, d:dict):
@@ -173,6 +174,7 @@ class ModelParamsDecoder(object):
         p.diffCondIntegration  = d.get("diffCondIntegration", "noisy")
         p.fnoModes     = d.get("fnoModes", ())
         p.refinerStd   = d.get("refinerStd", 0.0)
+        p.convnext_mult = d.get("convnext_mult", 2)
         return p
 
     def asDict(self) -> dict:
@@ -188,6 +190,7 @@ class ModelParamsDecoder(object):
             "diffCondIntegration" : self.diffCondIntegration,
             "fnoModes"     : self.fnoModes,
             "refinerStd"   : self.refinerStd,
+            "convnext_mult": self.convnext_mult
         }
 
 
