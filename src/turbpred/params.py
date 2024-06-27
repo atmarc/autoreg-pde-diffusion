@@ -43,7 +43,7 @@ class DataParams(object):
 
 
 class TrainingParams(object):
-    def __init__(self, epochs=20, lr=0.0001, expLrGamma=1.0, weightDecay=0.0, fadeInPredLoss=[-1,0], fadeInSeqLen=[-1,0], fadeInSeqLenLin=False):
+    def __init__(self, epochs=20, lr=0.0001, expLrGamma=1.0, weightDecay=0.0, fadeInPredLoss=[-1,0], fadeInSeqLen=[-1,0], fadeInSeqLenLin=False, noLSIM=False):
         self.epochs            = epochs            # number of training epochs
         self.lr                = lr                # learning rate
         self.expLrGamma        = expLrGamma        # factor for exponential learning rate decay
@@ -51,7 +51,8 @@ class TrainingParams(object):
         self.fadeInPredLoss    = fadeInPredLoss    # start and end epoch of fading in the prediction loss terms
         self.fadeInSeqLen      = fadeInSeqLen      # start and end epoch of fading in the sequence length
         self.fadeInSeqLenLin   = fadeInSeqLenLin   # exponential or linear scaling of fading in the sequence length
-        
+        self.noLSIM            = noLSIM            # deactivate the LSIM loss
+
     @classmethod
     def fromDict(cls, d:dict):
         p = cls()
@@ -62,6 +63,7 @@ class TrainingParams(object):
         p.fadeInPredLoss    = d.get("fadeInPredLoss",   [])
         p.fadeInSeqLen      = d.get("fadeInSeqLen",     [])
         p.fadeInSeqLenLin   = d.get("fadeInSeqLenLin",  False)
+        p.noLSIM            = d.get("noLSIM",           False)
         return p
 
     def asDict(self) -> dict:
@@ -73,6 +75,7 @@ class TrainingParams(object):
             "fadeInPredLoss"    : self.fadeInPredLoss,
             "fadeInSeqLen"      : self.fadeInSeqLen,
             "fadeInSeqLenLin"   : self.fadeInSeqLenLin,
+            "noLSIM"            : self.noLSIM,
         }
 
 

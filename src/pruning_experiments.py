@@ -5,6 +5,7 @@ import torch
 from torch.utils.data import DataLoader, SequentialSampler, RandomSampler, SubsetRandomSampler
 from torch.nn.utils import prune
 import logging
+import argparse
 
 from turbpred.model import PredictionModel
 from turbpred.logger import Logger
@@ -112,7 +113,7 @@ def train(modelName:str, trainSet:TurbulenceDataset, testSets:Dict[str,Turbulenc
         testLoader = DataLoader(testSet, sampler=testSampler,
                         batch_size=p_d_test.batch, drop_last=False, num_workers=4)
         testHistory = LossHistory(shortName, testSet.name, logger.tfWriter, len(testLoader),
-                                    1, 1, printInterval=0, logInterval=0, simFields=p_d.simFields)
+                                    25, 25, printInterval=0, logInterval=0, simFields=p_d.simFields)
         tester = Tester(model, testLoader, criterion, testHistory, p_t)
         testers += [tester]
         testHistories += [testHistory]
@@ -157,7 +158,24 @@ def train(modelName:str, trainSet:TurbulenceDataset, testSets:Dict[str,Turbulenc
     print('Finished Training')
 
 
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--convnext_mult', type=int,   default=1,     help='convnext_mult paramater to scale net size')
+    parser.add_argument('--prune_freq',    type=int,   default=1,     help='Prunning frequency')
+    parser.add_argument('--prune_times',   type=int,   default=10,    help='Number of epochs to prune')
+    parser.add_argument('--prune_perc',    type=float, default=0.1,   help='Pruning percentage')
+    parser.add_argument('--prune_type',    type=str,   default="L2",  help='Pruning type')
+    parser.add_argument('--epochs',        type=int,   default=100,   help='Number of epochs to train')
+    parser.add_argument('--xsize',         type=int,   default=128,   help='Input X size, if different than (128,64) data is scaled')
+    parser.add_argument('--ysize',         type=int,   default=64,    help='Input Y size, if different than (128,64) data is scaled')
+    parser.add_argument('--noLSIM',        type=bool,  default=False, help='If true, the LSIM loss is deactivated for training and testing')
+
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
+    args = parse_arguments()
+    
     useGPU = True
     gpuID = "0"
 
@@ -167,14 +185,14 @@ if __name__ == "__main__":
     ### UNET
     modelName = "2D_Inc/128_unet-m2"
     p_d = DataParams(batch=32, augmentations=["normalize", "resize"], sequenceLength=[2,2], randSeqOffset=True,
-                dataSize=[64,32], dimension=2, simFields=["pres"], simParams=["rey"], normalizeMode="incMixed")
+                dataSize=[args.xsize, args.ysize], dimension=2, simFields=["pres"], simParams=["rey"], normalizeMode="incMixed")
     # p_d = DataParams(batch=32, augmentations=["normalize"], sequenceLength=[2,2], randSeqOffset=True,
                 # dataSize=[128,64], dimension=2, simFields=["pres"], simParams=["rey"], normalizeMode="incMixed")
     
-    p_t = TrainingParams(epochs=100, lr=0.0001)
+    p_t = TrainingParams(epochs=args.epochs, lr=0.0001, noLSIM=args.noLSIM)
     p_l = LossParams(recMSE=0.0, predMSE=1.0)
     p_me = None
-    p_md = ModelParamsDecoder(arch="unet", pretrained=False, trainingNoise=0.0, convnext_mult=1)
+    p_md = ModelParamsDecoder(arch="unet", pretrained=False, trainingNoise=0.0, convnext_mult=args.convnext_mult)
     p_ml = None
     pretrainPath = ""
 
@@ -193,13 +211,16 @@ if __name__ == "__main__":
                     filterFrame=[(300,800)], sequenceLength=[[250,2]], simFields=p_d.simFields, simParams=p_d.simParams, printLevel="sim"),
     }
 
-    p_t.prune_freq = 1
-    p_t.prune_times = 11
-    p_t.prune_perc = 0.1
-    p_t.prune_type = 'L2'
+    p_t.prune_freq = args.prune_freq
+    p_t.prune_times = args.prune_times
+    p_t.prune_perc = args.prune_perc
+    p_t.prune_type = args.prune_type
 
-
-    train(modelName, trainSet, testSets, p_d, p_t, p_l, p_me, p_md, p_ml, pretrainPath=pretrainPath, useGPU=useGPU, gpuID=gpuID) #type:ignore
+    train(
+        modelName, trainSet, testSets, 
+        p_d, p_t, p_l, p_me, p_md, p_ml, 
+        pretrainPath=pretrainPath, useGPU=useGPU, gpuID=gpuID
+    ) 
     
     # model = PredictionModel(p_d, p_t, p_l, p_me, p_md, p_ml, pretrainPath, useGPU)
     # model.printModelInfo()

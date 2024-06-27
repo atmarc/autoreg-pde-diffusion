@@ -135,7 +135,7 @@ class Trainer(object):
                 elif "+3Prev" in self.model.p_md.arch:
                     ignorePredLSIMSteps = 3
 
-            loss, lossParts, lossSeq = self.criterion(p, d, l, vaeMeanVar, fadePredWeight=fadeWeight, ignorePredLSIMSteps=ignorePredLSIMSteps)
+            loss, lossParts, lossSeq = self.criterion(p, d, l, vaeMeanVar, fadePredWeight=fadeWeight, ignorePredLSIMSteps=ignorePredLSIMSteps, noLSIM=self.p_t.noLSIM)
 
             loss.backward()
 
@@ -214,7 +214,7 @@ class Tester(object):
                     p = p * obsMask
                     d = d * obsMask
 
-                _, lossParts, lossSeq = self.criterion(p, d, l, vaeMeanVar, weighted=False)
+                _, lossParts, lossSeq = self.criterion(p, d, l, vaeMeanVar, weighted=False, noLSIM=self.p_t.noLSIM)
 
                 timerEnd = time.perf_counter()
                 self.testHistory.updateBatch(lossParts, lossSeq, s, (timerEnd-timerStart)/60.0)
