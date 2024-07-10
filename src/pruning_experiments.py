@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader, SequentialSampler, RandomSampler, Subse
 from torch.nn.utils import prune
 import logging
 import argparse
+import random
 
 from turbpred.model import PredictionModel
 from turbpred.logger import Logger
@@ -169,6 +170,9 @@ def parse_arguments():
     parser.add_argument('--xsize',         type=int,   default=128,   help='Input X size, if different than (128,64) data is scaled')
     parser.add_argument('--ysize',         type=int,   default=64,    help='Input Y size, if different than (128,64) data is scaled')
     parser.add_argument('--noLSIM',        type=bool,  default=False, help='If true, the LSIM loss is deactivated for training and testing')
+    parser.add_argument('--seed',          type=int,   default=1,     help='Random seed for pytorch')
+    parser.add_argument('--lr',            type=float, default=1e-4,  help='Learning rate')
+    parser.add_argument('--gamma',         type=float, default=1,     help='Lr scheduling parameter')
 
     return parser.parse_args()
 
@@ -179,8 +183,9 @@ if __name__ == "__main__":
     useGPU = True
     gpuID = "0"
 
-    torch.manual_seed(1)
-    torch.cuda.manual_seed(1)
+    random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed(args.seed)
 
     ### UNET
     modelName = "2D_Inc/128_unet-m2"
@@ -189,7 +194,7 @@ if __name__ == "__main__":
     # p_d = DataParams(batch=32, augmentations=["normalize"], sequenceLength=[2,2], randSeqOffset=True,
                 # dataSize=[128,64], dimension=2, simFields=["pres"], simParams=["rey"], normalizeMode="incMixed")
     
-    p_t = TrainingParams(epochs=args.epochs, lr=0.0001, noLSIM=args.noLSIM)
+    p_t = TrainingParams(epochs=args.epochs, lr=args.lr, noLSIM=args.noLSIM, expLrGamma=args.gamma)
     p_l = LossParams(recMSE=0.0, predMSE=1.0)
     p_me = None
     p_md = ModelParamsDecoder(arch="unet", pretrained=False, trainingNoise=0.0, convnext_mult=args.convnext_mult)
