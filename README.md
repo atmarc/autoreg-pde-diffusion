@@ -1,3 +1,15 @@
+# ⚠️ Pruning experimentation branch ⚠️
+In this branch, we experiment with pruning techniques for CNN networks. We mainly focused on the Incompressible Wake Flow scenario. We implemented the script `src/pruning_experiments.py` that can be called with multiple parameters, to automatically train and test the model with different pruning configurations. An example of this command could be:
+```
+python src/pruning_experiments.py --xsize 104 --ysize 52 --convnext_mult 2 --prune_times 8 --prune_perc 0.085 --prune_type L2 --epochs 400 --seed -1
+``` 
+
+There are more command examples in the `tasks.sh` script, which contains some of the executions done during our experimentation.
+
+We also used the `src/evaluate_models.ipynb` notebook to check the sparcity of the models, decide about hyperparameters and generate plots for the report.
+
+
+
 # Benchmarking Autoregressive Conditional Diffusion Models for Turbulent Flow Simulation
 This repository contains the source code for the paper [Benchmarking Autoregressive Conditional Diffusion Models for Turbulent Flow Simulation](https://arxiv.org/abs/2309.01745) by [Georg Kohl](https://ge.in.tum.de/about/georg-kohl/), [Liwei Chen](https://ge.in.tum.de/about/dr-liwei-chen/), and [Nils Thuerey](https://ge.in.tum.de/about/n-thuerey/). Our work benchmarks the prediction of turbulent flow fields from an initial condition across a range of architectures:
 
