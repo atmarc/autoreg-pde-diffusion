@@ -182,10 +182,12 @@ if __name__ == "__main__":
     
     useGPU = True
     gpuID = "0"
+    
+    num_seed = random.randint(0, 1e10) if args.seed == -1 else args.seed
 
-    random.seed(args.seed)
-    torch.manual_seed(args.seed)
-    torch.cuda.manual_seed(args.seed)
+    random.seed(num_seed)
+    torch.manual_seed(num_seed)
+    torch.cuda.manual_seed(num_seed)
 
     ### UNET
     modelName = "2D_Inc/128_unet-m2"
@@ -211,9 +213,9 @@ if __name__ == "__main__":
         "highRey" :
             TurbulenceDataset("Test High Reynolds 900-1000", ["data"], filterTop=["128_inc"], filterSim=[[0,2,4,6,8]],
                     filterFrame=[(1000,1150)], sequenceLength=[[60,2]], simFields=p_d.simFields, simParams=p_d.simParams, printLevel="sim"),
-        "varReyIn" :
-            TurbulenceDataset("Test Varying Reynolds Number (200-900)", ["data"], filterTop=["128_reyVar"], filterSim=[[0]],
-                    filterFrame=[(300,800)], sequenceLength=[[250,2]], simFields=p_d.simFields, simParams=p_d.simParams, printLevel="sim"),
+        # "varReyIn" :
+        #     TurbulenceDataset("Test Varying Reynolds Number (200-900)", ["data"], filterTop=["128_reyVar"], filterSim=[[0]],
+        #             filterFrame=[(300,800)], sequenceLength=[[250,2]], simFields=p_d.simFields, simParams=p_d.simParams, printLevel="sim"),
     }
 
     p_t.prune_freq = args.prune_freq
